@@ -5,7 +5,6 @@ const salt = bcryptjs.genSaltSync(10);
 
 export const Register = async (req, res) => {
   const { name, email, password } = req.body;
-  //   console.log(name, email, password);
   if (!name && !email && !password) {
     res.status(422).json({ message: "fields cannot be emplty" });
   }
@@ -46,14 +45,13 @@ export const login = async (req, res) => {
   let user;
   try {
     user = await User.findOne({ email });
-    console.log(user.password);
   } catch (err) {
     console.log(err);
   }
   const comparePass = bcryptjs.compareSync(password, user.password);
-  const success=false;
+
   if (!comparePass) {
-    res.status(400).json({ success,message: "invalid password" });
+    res.status(500).json({ success: "false", message: "invalid password" });
   } else {
     res
       .status(200)
