@@ -6,7 +6,7 @@ const serviceSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      unique:true
+    //   unique:true
     },
     category: {
       type: String,
@@ -17,7 +17,7 @@ const serviceSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Provider",
       required: true,
-      unique:true
+    //   unique:true
     },
     price: {
       type: Number,
@@ -27,12 +27,12 @@ const serviceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // bookings: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Booking",
-    //   },
-    // ],
+    bookings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Booking",
+      },
+    ],
   },
   {
     timestamps: true,

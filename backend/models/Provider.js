@@ -22,7 +22,6 @@ const providerSchema = new Schema(
     },
     servicesOffered: [
       {
-        // type: String,
         type: Schema.Types.ObjectId,
         ref: "Service",
       },
@@ -34,14 +33,13 @@ const providerSchema = new Schema(
     ratings: [
       {
         userId: { type: Schema.Types.ObjectId, ref: "User" }, // Customer who rated
-        // userId: { type: String, ref: "User" }, // Customer who rated
         rating: { type: Number, min: 1, max: 5 },
       },
     ],
-    averageRating: {
-      type: Number,
-      default: 0,
-    },
+    // averageRating: {
+    //   type: Number,
+    //   default: 0,
+    // },
     location: {
       type: String,
       required: true,
