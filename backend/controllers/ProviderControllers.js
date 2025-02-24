@@ -8,10 +8,8 @@ export const register = async (req, res) => {
     password,
     phone,
     experience,
-    servicesOffered=[],
-    ratings=[],
     location,
-    status,
+    status="pending",
   } = req.body;
   if (
     !businessName ||
@@ -19,10 +17,7 @@ export const register = async (req, res) => {
     !phone ||
     !password ||
     !experience ||
-    !servicesOffered ||
-    !ratings ||
-    !location ||
-    !status
+    !location 
   ) {
     res.status(422).json({ message: "fileds cannot be empty" });
   }
@@ -39,15 +34,13 @@ export const register = async (req, res) => {
       password,
       phone,
       experience,
-      servicesOffered,
-      ratings,
       location,
       status,
     });
     await provider.save();
     res
       .status(201)
-      .json({ success: "true", message: "registered successfull" });
+      .json({ success: "true", message: "registered successfull" ,provider});
   } catch (error) {
     console.log(error);
     res.status(400).json({ success:"false", message: "something went wrong" });

@@ -27,7 +27,7 @@ export const addService = async (req, res) => {
 
   let findExixtingService = await Service.findOne({
     name,
-    providerId: new mongoose.Types.Schema.ObjectId(providerId),
+    providerId,
   });
   if (findExixtingService) {
     res
@@ -62,41 +62,48 @@ export const addService = async (req, res) => {
   }
 };
 
-export const rateService=async(req,res)=>{
-  const {serviceId} = req.params;
-  const {userId,rating}=req.body;
+export const rateService = async (req, res) => {
+  const { serviceId } = req.params;
+  const { userId, rating } = req.body;
 
-  if(!userId || !rating ||rating<1 ||rating<5){
-    res.status(400).json({message:"give userid and rating between 1to 5"})
+  if (!userId || !rating || rating < 1 || rating > 5) {
+    return res
+      .status(400)
+      .json({ message: "give userid and rating between 1to 5" });
   }
-try{
+  try {
+    let service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ message: "service not found" });
+    }
 
-  let service= await Service.findById(serviceId);
-  if(!service){
-    res.status(404).json({message:"service not found"})
+    const existingRating = service.ratings.find(
+      (r) => r.userId.toString() === userId
+    );
+    if (existingRating) {
+      return res
+        .status(400)
+        .json({ message: "user has already rated that service" });
+    }
+    service.ratings.push({ userId, rating });
+
+    const totalRatings = service.ratings.length;
+    const sumRatings = service.ratings.reduce((sum, r) => sum + r.rating, 0);
+
+    service.averageRating = sumRatings / totalRatings;
+
+    await service.save();
+
+    await updateProviderRating(service.providerId);
+    return res
+      .status(200)
+      .json({ message: "rating submitted successfully", service });
+  } catch (err) {
+    return res.status(500).json({ message: "server error", err });
   }
+};
 
-  const existingRating = await Service.ratings.finf((r)=>r.userId.toString()===userId);
-  if(existingRating){
-    res.status(400).json({message:"user has already rated that service"});
-  }
- service.ratings.push({userId,rating});
-
- const totalRatings = service.ratings.length;
- const sumRatings = service.ratings.reduce((sum,r)=>sum+r.rating,0)
- service.averageRating=sumRatings/totalRatings;
- await service.save();
-
- await updateProviderRating(service.providerId);
- res.status(200).json({message:"rating submitted successfully",service})
-
-}
-catch(err){
-res.status(500).json({message:"server error",err})
-}
-}
-
-const updateProviderRating = async(id)=>{
+const updateProviderRating = async (providerId) => {
   try {
     const services = await Service.find({ providerId });
 
@@ -112,12 +119,15 @@ const updateProviderRating = async(id)=>{
       }
     }
 
-    const provider = await Provider.findById(providerId);
+    const provider = await Provider.findById(providerId );
     if (!provider) return;
 
-    provider.averageRating = totalServicesWithRatings > 0 ? totalRatings / totalServicesWithRatings : 0;
+    provider.averageRating =
+      totalServicesWithRatings > 0
+        ? totalRatings / totalServicesWithRatings
+        : 0;
     await provider.save();
   } catch (error) {
     console.error("Error updating provider rating:", error);
   }
-}
+};
