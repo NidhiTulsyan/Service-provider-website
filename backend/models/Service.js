@@ -33,7 +33,15 @@ const serviceSchema = new mongoose.Schema(
         ref: "Booking",
       },
     ],
+    ratings: [
+    {
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      rating: { type: Number, min: 1, max: 5 },
+    },
+  ],
+  averageRating: { type: Number, default: 0 },
   },
+  
   {
     timestamps: true,
   }
